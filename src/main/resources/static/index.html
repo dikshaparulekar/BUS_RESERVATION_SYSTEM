@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Seat Reservation System</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --available: #22c55e;
+            --booked: #ef4444;
+            --selected: #eab308;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background-color: var(--card-bg); border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        h1 { font-size: 1.5rem; color: var(--primary); }
+        .user-info { font-weight: 600; }
+        .container { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .card { background-color: var(--card-bg); padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
+        .card h2 { margin-bottom: 15px; font-size: 1.2rem; border-bottom: 2px solid var(--border-color); padding-bottom: 8px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; }
+        input, select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 1rem; }
+        button { background-color: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 1rem; }
+        button:hover { background-color: var(--primary-hover); }
+        .auth-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        .bus-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .bus-card { border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; cursor: pointer; transition: transform 0.2s; }
+        .bus-card:hover { transform: translateY(-3px); border-color: var(--primary); }
+        
+        .seat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 15px; max-width: 400px; }
+        .seat { padding: 15px; text-align: center; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; }
+        .seat.AVAILABLE { background-color: var(--available); }
+        .seat.BOOKED { background-color: var(--booked); cursor: not-allowed; opacity: 0.7; }
+        .seat.SELECTED { background-color: var(--selected); }
+
+        .hidden { display: none !important; }
+        .alert { padding: 10px 15px; border-radius: 4px; margin-bottom: 15px; }
+        .alert-success { background-color: #dcfce7; color: #15803d; }
+        .alert-error { background-color: #fee2e2; color: #b91c1c; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; border: 1px solid var(--border-color); text-align: left; }
+        th { background-color: #f1f5f9; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🚌 Bus Seat Reservation System</h1>
+    <div id="userHeader" class="user-info">
+        <span id="userNameDisplay">Not logged in</span>
+        <button id="logoutBtn" class="hidden" onclick="logout()" style="margin-left:15px; padding:5px 10px; font-size:0.85rem;">Logout</button>
+    </div>
+</header>
+
+<div class="container">
+    <div id="alertBox" class="alert hidden"></div>
+
+    <!-- Auth View -->
+    <div id="authSection" class="auth-container">
+        <div class="card">
+            <h2>User Registration</h2>
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="regName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="regEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="regPassword" required minlength="6">
+                </div>
+                <button type="submit">Register</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>User Login</h2>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard View -->
+    <div id="dashboardSection" class="hidden">
+        <!-- Bus Selection -->
+        <div class="card">
+            <h2>Available Buses</h2>
+            <div id="busList" class="bus-list"></div>
+        </div>
+
+        <!-- Seat Selection -->
+        <div id="seatSection" class="card hidden">
+            <h2>Select Seat for <span id="selectedBusName"></span></h2>
+            <div id="seatGrid" class="seat-grid"></div>
+            <div style="margin-top: 20px;">
+                <button id="bookSeatBtn" onclick="submitBooking()" disabled>Confirm Booking</button>
+            </div>
+        </div>
+
+        <!-- My Bookings -->
+        <div class="card" style="margin-top: 20px;">
+            <h2>My Bookings</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Bus</th>
+                        <th>Seat</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="bookingsTableBody">
+                    <tr><td colspan="6" style="text-align: center;">No bookings found</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentUser = null;
+    let selectedBusId = null;
+    let selectedSeatId = null;
+
+    function showAlert(msg, isError = false) {
+        const box = document.getElementById('alertBox');
+        box.textContent = msg;
+        box.className = `alert ${isError ? 'alert-error' : 'alert-success'}`;
+        box.classList.remove('hidden');
+        setTimeout(() => box.classList.add('hidden'), 4000);
+    }
+
+    async function handleRegister(e) {
+        e.preventDefault();
+        const body = {
+            name: document.getElementById('regName').value,
+            email: document.getElementById('regEmail').value,
+            password: document.getElementById('regPassword').value
+        };
+        const res = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (data.success) {
+            showAlert('Registration successful! Please log in.');
+            document.getElementById('registerForm').reset();
+        } else {
+            showAlert(data.message, true);
+        }
+    }
+
+    async function handleLogin(e) {
+        e.preventDefault();
+        const body = {
+            email: document.getElementById('loginEmail').value,
+            password: document.getElementById('loginPassword').value
+        };
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (data.success) {
+            currentUser = data.data;
+            document.getElementById('userNameDisplay').textContent = `Welcome, ${currentUser.name}`;
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            showAlert('Login successful!');
+            loadBuses();
+            loadMyBookings();
+        } else {
+            showAlert(data.message, true);
+        }
+    }
+
+    function logout() {
+        currentUser = null;
+        document.getElementById('userNameDisplay').textContent = 'Not logged in';
+        document.getElementById('logoutBtn').classList.add('hidden');
+        document.getElementById('authSection').classList.remove('hidden');
+        document.getElementById('dashboardSection').classList.add('hidden');
+        showAlert('Logged out successfully.');
+    }
+
+    async function loadBuses() {
+        const res = await fetch('/api/buses');
+        const data = await res.json();
+        const container = document.getElementById('busList');
+        container.innerHTML = '';
+
+        if (data.success && data.data.length > 0) {
+            data.data.forEach(bus => {
+                const div = document.createElement('div');
+                div.className = 'bus-card';
+                div.innerHTML = `<h3>${bus.busNumber}</h3><p>${bus.source} → ${bus.destination}</p><p><small>Seats: ${bus.totalSeats}</small></p>`;
+                div.onclick = () => selectBus(bus);
+                container.appendChild(div);
+            });
+        }
+    }
+
+    async function selectBus(bus) {
+        selectedBusId = bus.id;
+        selectedSeatId = null;
+        document.getElementById('selectedBusName').textContent = `${bus.busNumber} (${bus.source} to ${bus.destination})`;
+        document.getElementById('seatSection').classList.remove('hidden');
+        document.getElementById('bookSeatBtn').disabled = true;
+
+        const res = await fetch(`/api/buses/${bus.id}/seats`);
+        const data = await res.json();
+        const grid = document.getElementById('seatGrid');
+        grid.innerHTML = '';
+
+        if (data.success) {
+            data.data.forEach(seat => {
+                const s = document.createElement('div');
+                s.className = `seat ${seat.status}`;
+                s.textContent = seat.seatNumber;
+                if (seat.status === 'AVAILABLE') {
+                    s.onclick = () => {
+                        document.querySelectorAll('.seat').forEach(el => el.classList.remove('SELECTED'));
+                        s.classList.add('SELECTED');
+                        selectedSeatId = seat.id;
+                        document.getElementById('bookSeatBtn').disabled = false;
+                    };
+                }
+                grid.appendChild(s);
+            });
+        }
+    }
+
+    async function submitBooking() {
+        if (!selectedSeatId) return;
+        const res = await fetch('/api/bookings', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ seatId: selectedSeatId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showAlert('Booking confirmed!');
+            loadBuses();
+            selectBus({ id: selectedBusId, busNumber: document.getElementById('selectedBusName').textContent });
+            loadMyBookings();
+        } else {
+            showAlert(data.message, true);
+        }
+    }
+
+    async function loadMyBookings() {
+        const res = await fetch('/api/bookings/my');
+        const data = await res.json();
+        const tbody = document.getElementById('bookingsTableBody');
+        tbody.innerHTML = '';
+
+        if (data.success && data.data.length > 0) {
+            data.data.forEach(b => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>#${b.id}</td>
+                    <td>${b.seat.bus.busNumber} (${b.seat.bus.source} - ${b.seat.bus.destination})</td>
+                    <td>${b.seat.seatNumber}</td>
+                    <td>${new Date(b.bookingDate).toLocaleString()}</td>
+                    <td><strong>${b.status}</strong></td>
+                    <td>
+                        ${b.status === 'CONFIRMED' ? `<button onclick="cancelBooking(${b.id})" style="background:#ef4444; padding:5px 10px; font-size:0.85rem;">Cancel</button>` : '-'}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } else {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No bookings found</td></tr>';
+        }
+    }
+
+    async function cancelBooking(id) {
+        if (!confirm('Are you sure you want to cancel this booking?')) return;
+        const res = await fetch(`/api/bookings/${id}/cancel`, {
+            method: 'PUT'
+        });
+        const data = await res.json();
+        if (data.success) {
+            showAlert('Booking cancelled successfully.');
+            if (selectedBusId) {
+                selectBus({ id: selectedBusId, busNumber: document.getElementById('selectedBusName').textContent });
+            }
+            loadMyBookings();
+        } else {
+            showAlert(data.message, true);
+        }
+    }
+</script>
+</body>
+</html>
