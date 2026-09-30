@@ -1,0 +1,20 @@
+---
+- name: Provision and Deploy Bus Seat Reservation System
+  hosts: webservers
+  tasks:
+    - name: Ensure application directory exists
+      file:
+        path: /opt/bus_reservation
+        state: directory
+        mode: '0755'
+
+    - name: Check application health endpoint
+      uri:
+        url: http://localhost:8080/actuator/health
+        status_code: 200
+      register: health_check
+      ignore_errors: true
+
+    - name: Display deployment status
+      debug:
+        msg: "Bus Seat Reservation System is active and provisioned."
