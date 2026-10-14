@@ -22,8 +22,32 @@ Implemented and verified core user auth and booking flow:
 
 ---
 
-## 3. Git Evidence
+## 3. Git Evidence & Feature Branch Commits
 
-* Branch created: `feature/auth-and-booking`
-* Commit hash baseline created
-* Pushed to remote: `git push -u origin feature/auth-and-booking`
+* **Branch Name**: `feature/auth-and-booking`
+* **Parent Branch**: `develop`
+* **Key Feature Commit**: `2483ed3` (`Task 5: Implement feature/auth-and-booking flow and documentation`)
+* **Remote Tracking**: `origin/feature/auth-and-booking`
+
+---
+
+## 4. Feature Implementation Verification & Code Review Checklist
+
+| Verification Item | Implementation File / Endpoint | Status | Review Notes |
+|---|---|---|---|
+| User Registration | `UserService.java`, `AuthController.java` (`POST /api/auth/register`) | Verified | Validates duplicate email and encodes password |
+| User Authentication | `SecurityConfig.java`, `AuthController.java` (`POST /api/auth/login`) | Verified | Authenticates credentials and sets session context |
+| Seat Inspection | `BusService.java`, `BusController.java` (`GET /api/buses/{id}/seats`) | Verified | Returns seat array with `AVAILABLE`/`BOOKED` status |
+| Booking Creation | `BookingService.java`, `BookingController.java` (`POST /api/bookings`) | Verified | Atomic booking creation with seat state update |
+| Unit Tests | `BusReservationApplicationTests.java` | Verified | All tests passing prior to merge request |
+
+---
+
+## 5. Pull Request & Merging Process
+
+1. Feature branch created: `git checkout -b feature/auth-and-booking develop`
+2. Incremental feature commits made with clear commit messages.
+3. Local test suite verified via `mvn clean test`.
+4. Feature branch pushed to GitHub: `git push -u origin feature/auth-and-booking`.
+5. Code reviewed against Definition of Done before merging into `develop`.
+
