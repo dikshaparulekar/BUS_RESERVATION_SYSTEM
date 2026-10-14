@@ -1,35 +1,62 @@
-# Task 11 & 12 – Docker Image, Container Lifecycle & CD Pipeline
+# Task 11 – Docker Image and Container Lifecycle
 
 ## Project Title
 **Dockerized Bus Seat Reservation System**
 
 ---
 
-## 1. Dockerfile Architecture
+## 1. Dockerfile Architecture & Optimization
 
-Multi-stage build definition (`Dockerfile`):
-* **Build Stage**: `maven:3.9.6-eclipse-temurin-21`
-* **Runtime Stage**: `eclipse-temurin:21-jre-alpine`
-* **Exposed Port**: 8080
+* **Base Runtime Image**: `eclipse-temurin:21-jre-alpine` (Minimal attack surface and lightweight image footprint)
+* **Application Binary**: `target/bus-reservation-system-1.0.0.jar`
+* **Exposed Port**: `8085` (Configured to avoid conflicts with default Jenkins container on 8080/8081)
+* **Entrypoint**: `["java", "-jar", "app.jar"]`
+
+```dockerfile
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+COPY target/bus-reservation-system-1.0.0.jar app.jar
+EXPOSE 8085
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
 
 ---
 
-## 2. Container Lifecycle Commands
+## 2. Container Lifecycle Commands & Verification
 
+### 2.1 Build Image
 ```bash
-# Build image
-docker build -t bus-reservation:1.0.0 .
-
-# Run container
-docker run -d -p 8080:8080 --name bus-app bus-reservation:1.0.0
-
-# Verify running container
-docker ps
-
-# View container logs
-docker logs bus-app
-
-# Stop and remove container
-docker stop bus-app
-docker rm bus-app
+docker build -t bus-reservation-system:latest .
 ```
+* Generates tag `bus-reservation-system:latest`.
+
+### 2.2 Container Execution & Port Mapping
+```bash
+docker run -d -p 8085:8085 --name bus-reservation-container bus-reservation-system:latest
+```
+* Binds host port `8085` directly to container port `8085`.
+
+### 2.3 Status Inspection & Logging
+```bash
+docker ps -a --filter "name=bus-reservation-container"
+docker logs bus-reservation-container
+```
+
+### 2.4 Container Lifecycle Management
+```bash
+# Graceful stop
+docker stop bus-reservation-container
+
+# Container restart
+docker start bus-reservation-container
+
+# Clean container removal
+docker rm bus-reservation-container
+```
+
+---
+
+## 3. Container Verification Evidence
+* Image `bus-reservation-system:latest` verified locally.
+* Container `bus-reservation-container` confirmed mapped to `0.0.0.0:8085->8080/8085`.
+
