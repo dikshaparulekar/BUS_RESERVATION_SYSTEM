@@ -194,18 +194,25 @@ The complete DevOps workflow will later be:
 
 ---
 
-## 12. Task 1 Deliverables
+## 12. Stakeholder Engagement Matrix & RACI
 
-The following deliverables are completed for Task 1:
+| Role | Person / Group | Responsible (R) | Accountable (A) | Consulted (C) | Informed (I) |
+|---|---|---|---|---|---|
+| Project Lead / Developer | Diksha Parulekar | R | A | C | I |
+| QA & Test Automation | QA Engineer | R | A | C | I |
+| DevOps & Infrastructure | DevOps Lead | R | A | C | I |
+| Academic Evaluator | Project Faculty / Guide | - | A | C | I |
+| End-User Representative | Bus Passenger | - | - | C | I |
 
-- Problem Statement
-- Target Users
-- Existing Pain Points
-- Stakeholder List
-- Project Objectives
-- Project Constraints
-- Measurable Success Criteria
-- MVP Scope
-- Out-of-Scope Features
-- Frozen 15-Task Project Scope
-- Application and DevOps Workflow
+---
+
+## 13. Scope Baseline Sign-off & Task 1 Deliverables
+
+The scope baseline is formally documented and approved under the official 15-task DevOps lifecycle:
+
+1. **Problem Statement & Justification**: Documented clear deficiencies in manual ticketing (overbooking, lack of real-time seat availability, uncoordinated cancellations).
+2. **Target User Personas**: Formalized Passenger and Administrator profiles.
+3. **Measurable Success Criteria**: Established 12 objective criteria covering application functionality and DevOps milestones.
+4. **Boundary Definition**: Strictly delimited core MVP (Registration, Login, View, Book, Cancel, Status) from out-of-scope enterprise additions (payments, live GPS).
+5. **15-Task DevOps Execution Roadmap**: All 15 official tasks defined with explicit mapping to Git branching, Jenkins CI/CD, Docker lifecycle, and Ansible automation.
+
