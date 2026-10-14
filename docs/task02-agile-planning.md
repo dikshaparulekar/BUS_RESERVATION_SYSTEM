@@ -181,3 +181,16 @@ A task will be considered **Done** only when:
 - Required documentation is updated.
 - Evidence such as screenshots, logs, reports or links is collected when required.
 - The task is moved to the Done column.
+
+---
+
+# 7. Sprint Cadence & DevOps Feedback Loops
+
+| Ceremony / Mechanism | Cadence | Artifact Produced | Continuous Feedback Loop |
+|---|---|---|---|
+| Sprint Planning | Start of each Sprint (2-week cadence) | Sprint Backlog & Story Point Allocation | Prioritization based on MVP critical path |
+| Daily Scrum | Daily (Async Standup) | Daily Progress / Blocker Identification | Immediate escalation of build or environment blocks |
+| Continuous Integration | On Git Push | Build status & test results | Immediate Jenkins build notification |
+| Sprint Review & Demo | End of each Sprint | Live feature demo & test report | Acceptance sign-off against DoD |
+| Retrospective | Post-Sprint | Action items for pipeline & workflow | Continuous refinement of automation scripts |
+
