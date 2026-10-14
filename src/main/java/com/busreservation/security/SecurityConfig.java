@@ -28,6 +28,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/bookings/**").authenticated()
                 .anyRequest().authenticated()
             )
+            .securityContext(context -> context.securityContextRepository(new org.springframework.security.web.context.HttpSessionSecurityContextRepository()))
             .headers(headers -> headers.frameOptions(frame -> frame.disable())); // Required for H2 console
 
         return http.build();

@@ -201,7 +201,8 @@
         }
     }
 
-    function logout() {
+    async function logout() {
+        await fetch('/api/auth/logout', { method: 'POST' });
         currentUser = null;
         document.getElementById('userNameDisplay').textContent = 'Not logged in';
         document.getElementById('logoutBtn').classList.add('hidden');
