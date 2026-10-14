@@ -48,9 +48,50 @@ This document defines the functional and non-functional requirements, system arc
 
 ---
 
-## 5. Technology Stack
+## 5. Non-Functional Requirements (NFRs)
 
-* **Backend**: Java 21, Spring Boot 3.x, Spring Data JPA, Spring Security, H2 (dev/test) / MySQL (prod/docker)
-* **Frontend**: Vanilla HTML5, CSS3, JavaScript (Fetch API)
-* **Build**: Maven 3.9+
-* **DevOps**: Git, GitHub, Jenkins, Selenium, Docker, Ansible
+* **NFR-01 Security**: Passwords hashed with BCrypt (strength 10). Session-based authentication via Spring Security with CSRF protection disabled for REST endpoints and frame options disabled for H2 console.
+* **NFR-02 Reliability & Concurrency**: Duplicate seat reservations prevented through transaction management and status verification.
+* **NFR-03 Portability**: Containerized using multi-stage/alpine OpenJDK runtime executable on any Docker-compliant host.
+* **NFR-04 Performance**: In-memory and indexed database queries with sub-100ms response time for seat queries under nominal load.
+* **NFR-05 Maintainability**: Layered Spring Boot architecture (Controller -> Service -> Repository -> Entity) separating business rules from data persistence.
+
+---
+
+## 6. Architectural Layers & Data Flow
+
+```
+[ Web Browser Client (HTML5/CSS3/Vanilla JS) ]
+                      │
+              HTTP / REST (Port 8085)
+                      ▼
+[ Presentation Layer: Spring MVC REST Controllers ]
+   ├── AuthController (/api/auth)
+   ├── BusController (/api/buses)
+   ├── BookingController (/api/bookings)
+   └── AdminController (/api/admin)
+                      │
+[ Business Logic Layer: Spring Services ]
+   ├── UserService
+   ├── BusService
+   └── BookingService
+                      │
+[ Data Access Layer: Spring Data JPA Repositories ]
+   ├── UserRepository
+   ├── BusRepository
+   ├── SeatRepository
+   └── BookingRepository
+                      │
+[ Persistence Layer: H2 In-Memory / File Database ]
+```
+
+---
+
+## 7. Technology Stack Selection & Justification
+
+* **Backend**: Java 21, Spring Boot 3.x — selected for long-term support, built-in dependency injection, and native container support.
+* **Frontend**: Responsive Single-Page Application in HTML5, CSS3, JavaScript (Fetch API) — lightweight, no Node runtime needed for client serving.
+* **Persistence**: Spring Data JPA + H2 In-Memory Database for rapid CI/CD automated test cycles without external DB provisioning bottlenecks.
+* **Build Tool**: Apache Maven 3.9+ — standard declarative build and testing lifecycle.
+* **DevOps Infrastructure**: Git, GitHub, Jenkins LTS, Selenium WebDriver, Docker, and Ansible.
+
