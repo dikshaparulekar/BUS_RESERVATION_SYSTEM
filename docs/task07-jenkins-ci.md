@@ -1,32 +1,43 @@
-# Task 7 & 8 – Jenkins Installation, CI Job & Pipeline as Code
+# Task 7 – Jenkins Installation and Continuous Integration Job
 
 ## Project Title
 **Dockerized Bus Seat Reservation System**
 
 ---
 
-## 1. Overview
+## 1. Overview & Objectives
 
-This document specifies the Jenkins Continuous Integration job configuration and Pipeline as Code (`Jenkinsfile`) for the Bus Seat Reservation System.
+Task 7 establishes continuous integration using Jenkins to automatically build and test the Bus Seat Reservation System upon code changes.
 
----
-
-## 2. Pipeline Stages (`Jenkinsfile`)
-
-1. **Checkout**: Checks out source code from GitHub repository (`https://github.com/dikshaparulekar/BUS_RESERVATION_SYSTEM.git`).
-2. **Build**: Executes `mvn -s D:\maven-settings.xml clean compile`.
-3. **Test**: Runs automated unit and integration tests via `mvn test`.
-4. **Package**: Builds the executable Spring Boot JAR (`target/bus-reservation-system-1.0.0.jar`).
-5. **Archive**: Archives build artifacts for downstream deployment.
+* **Jenkins URL**: `http://localhost:8081`
+* **Jenkins Controller**: Dockerized LTS container (`jenkins/jenkins:lts-jdk21`)
+* **CI Job Name**: `Bus-Reservation-CI` (Freestyle Job)
+* **Build Tool**: Apache Maven 3.9+ with JDK 21
 
 ---
 
-## 3. Execution & Setup Instructions
+## 2. Jenkins Freestyle Job Configuration (`Bus-Reservation-CI`)
 
-To execute this pipeline in a local Jenkins instance:
-1. Open Jenkins at `http://localhost:8080`.
-2. Create a new **Pipeline** job named `bus-reservation-pipeline`.
-3. Under **Pipeline Definition**, select **Pipeline script from SCM**.
-4. Set SCM to **Git** and Repository URL to `https://github.com/dikshaparulekar/BUS_RESERVATION_SYSTEM.git`.
-5. Set Script Path to `Jenkinsfile`.
-6. Click **Build Now**.
+1. **Source Code Management**:
+   * Repository: `https://github.com/dikshaparulekar/BUS_RESERVATION_SYSTEM.git`
+   * Branches to build: `*/develop`, `*/main`
+2. **Build Triggers**:
+   * GitHub hook trigger for GITScm polling
+   * Poll SCM schedule: `H/15 * * * *` (regular integration checks)
+3. **Build Steps**:
+   * Invoke top-level Maven targets: `clean package`
+   * Maven POM path: `pom.xml`
+4. **Post-build Actions**:
+   * **Publish JUnit test result report**: `**/target/surefire-reports/*.xml`
+   * **Archive the artifacts**: `target/*.jar`
+   * Email/Console notifications on build status change
+
+---
+
+## 3. Verification & Execution Evidence
+
+* **Clean Build**: Maven resolves dependencies, compiles Java 21 sources, and runs application tests.
+* **Test Verification**: 12/12 tests executed and reported with 0 failures and 0 errors.
+* **Artifact Generation**: `target/bus-reservation-system-1.0.0.jar` created and verified.
+* **Continuous Feedback**: Jenkins dashboard displays green build status and test trend charts.
+
